@@ -1,0 +1,74 @@
+import os
+import math
+
+# Función para contar el número de rachas y generar una lista de signos
+def count_runs_and_signs(data):
+    signs = []
+    runs = 0
+    for i in range(1, len(data)):
+        sign = '+' if data[i] > data[i - 1] else '-'
+        signs.append(sign)
+        if i == 1 or sign != signs[i - 2]:
+            runs += 1
+    return runs, signs
+
+# Función para calcular la media y la desviación estándar
+def calculate_statistics(signs):
+    n = len(signs)
+    miu = (2 * n - 1) / 3
+    sigma = math.sqrt((16 * n - 29) / 90)
+    return miu, sigma
+
+# Función para calcular el puntaje Z
+def calculate_z_score(runs, miu, sigma):
+    z_score = (runs - miu) / sigma
+    return z_score
+
+# Función para imprimir el resultado de la prueba
+def print_result(z_score, alpha=0.05):
+    h0 = "Appereance of the numbers is random"
+    h1 = "Appereance of the numbers is not random"
+    
+    print("Generated signs:")
+    print(" ".join(signs))
+    print(f"total signs: {len(signs)}\n")  # Total de signos generados
+    print(f"total runs: {runs}\n")
+    
+    print("Statistics")
+    print(f"Miu = {miu:.4f}")
+    print(f"Sigma = {sigma:.5f}")
+    print(f"Zscore = {z_score:.6f}\n")
+    
+    print("H0:", h0)
+    print("H1:", h1)
+    
+    if abs(z_score) < abs(z_critical):
+        print(f"Since |{z_score}| < |{z_critical}|, H0 is not rejected")
+    else:
+        print(f"Since |{z_score}| >= |{z_critical}|, H0 is rejected")
+
+# Obtener la ruta completa del archivo en el escritorio
+desktop_path = os.path.expanduser("~/Desktop")
+file_path = os.path.join(desktop_path, "runs_data.txt")
+
+# Cargar datos desde el archivo
+with open(file_path, "r") as file:
+    data = [float(line.strip()) for line in file.readlines()]
+
+# Definir el nivel de significancia (alpha)
+alpha = 0.05
+
+# Contar rachas y calcular signos
+runs, signs = count_runs_and_signs(data)
+
+# Calcular la media y la desviación estándar
+miu, sigma = calculate_statistics(signs)
+
+# Calcular el puntaje Z crítico
+z_critical = abs(1.96)  # Para alpha = 0.05
+
+# Calcular el puntaje Z
+z_score = calculate_z_score(runs, miu, sigma)
+
+# Imprimir el resultado de la prueba
+print_result(z_score, alpha)
